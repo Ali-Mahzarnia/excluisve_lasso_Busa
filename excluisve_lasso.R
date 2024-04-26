@@ -100,7 +100,7 @@ age_predicted_whole$risk = df$risk
 
 ggplot(age_predicted_whole, aes( x=as.numeric(age), y= age_gap_corr, fill = geno, color = geno  ) )+
   geom_point()+geom_smooth( method='lm') #+geom_text(x=40, y=15, label=paste0("Intercept P Values" , ) )
-
+  
 # 
 # ##############################
 # ###
