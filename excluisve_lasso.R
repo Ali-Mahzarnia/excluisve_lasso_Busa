@@ -1,5 +1,6 @@
 library(xlsx)
-path = "master_df_all_all_all_all.xlsx"
+library(ggplot2)
+path = "master_df_all_all_all.xlsx"
 df_original = read.xlsx2(path, sheetName = "Sheet1")
 
 
@@ -53,6 +54,16 @@ index= which(coefs != 0)
 
 results =cbind(all_names[index], coefs[index] )
 write.xlsx2( results , paste0(length(mean_names),"_bundles_full_model.xlsx") )
+
+
+age_gap_whole = as.data.frame(df_run_y  - predict(ex))
+colnames(age_gap_whole) = "age_gap"
+age_gap_whole$geno =  df$geno
+age_gap_whole$age = df$age  
+
+ggplot(age_gap_whole, aes( x=as.numeric(age), y= age_gap, fill = geno, color = geno  ) )+
+geom_smooth( method='lm')
+ggsave(  paste0(length(mean_names),"_bundles_age_gap_vs_age.png"), plot= last_plot())
 ##############################
 ###
 ### only apoe3 
@@ -107,6 +118,7 @@ index= which(coefs != 0)
 
 
 
+
 results =cbind(all_names[index], coefs[index] )
 write.xlsx2( results , paste0(length(mean_names),"_bundles_apoe3_model.xlsx") )
 
@@ -140,7 +152,6 @@ df_run_x = t(apply(df_run_x, 1, unlist))
 df_run_x = t(apply(df_run_x, 1, as.numeric))
 df_run_x = scale(df_run_x)
 # df_run_x[is.na(df_run_x)]  = 0 
-
 df_run_y = t(age)
 df_run_y = apply(df_run_y, 1, unlist)
 df_run_y = apply(df_run_y, 1, as.numeric)
