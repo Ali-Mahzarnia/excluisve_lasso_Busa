@@ -1,5 +1,5 @@
 library(xlsx)
-path = "master_df_all_all.xlsx"
+path = "master_df_all_all_all_all.xlsx"
 df_original = read.xlsx2(path, sheetName = "Sheet1")
 
 
@@ -19,6 +19,7 @@ all_names = c(mean_names,sd_names, num_st_names, vol_st_names, len_st_names )
 df_run_x = t(apply(df_run_x, 1, unlist))
 df_run_x = t(apply(df_run_x, 1, as.numeric))
 df_run_x = scale(df_run_x)
+# df_run_x[is.na(df_run_x)]  = 0 
 df_run_y = t(age)
 df_run_y = apply(df_run_y, 1, unlist)
 df_run_y = apply(df_run_y, 1, as.numeric)
@@ -51,7 +52,7 @@ index= which(coefs != 0)
 
 
 results =cbind(all_names[index], coefs[index] )
-write.xlsx2( results , "full_model.xlsx")
+write.xlsx2( results , paste0(length(mean_names),"_bundles_full_model.xlsx") )
 ##############################
 ###
 ### only apoe3 
@@ -75,7 +76,8 @@ all_names = c(mean_names,sd_names, num_st_names, vol_st_names, len_st_names )
 df_run_x = t(apply(df_run_x, 1, unlist))
 df_run_x = t(apply(df_run_x, 1, as.numeric))
 df_run_x = scale(df_run_x)
-df_run_y = t(age)
+# df_run_x[is.na(df_run_x)]  = 0 
+df_run_y = t(age) 
 df_run_y = apply(df_run_y, 1, unlist)
 df_run_y = apply(df_run_y, 1, as.numeric)
 df_run = cbind(df_run_y,df_run_x)
@@ -106,7 +108,7 @@ index= which(coefs != 0)
 
 
 results =cbind(all_names[index], coefs[index] )
-write.xlsx2( results , "apoe3_model.xlsx")
+write.xlsx2( results , paste0(length(mean_names),"_bundles_apoe3_model.xlsx") )
 
 
 age_gap_3 = df_run_y - predict(ex)
@@ -137,6 +139,8 @@ all_names = c(mean_names,sd_names, num_st_names, vol_st_names, len_st_names )
 df_run_x = t(apply(df_run_x, 1, unlist))
 df_run_x = t(apply(df_run_x, 1, as.numeric))
 df_run_x = scale(df_run_x)
+# df_run_x[is.na(df_run_x)]  = 0 
+
 df_run_y = t(age)
 df_run_y = apply(df_run_y, 1, unlist)
 df_run_y = apply(df_run_y, 1, as.numeric)
@@ -168,7 +172,7 @@ index= which(coefs != 0)
 
 
 results =cbind(all_names[index], coefs[index] )
-write.xlsx2( results , "apoe4_model.xlsx")
+write.xlsx2( results , paste0(length(mean_names),"_bundles_apoe4_model.xlsx"))
 
 
 age_gap_4 = df_run_y - predict(ex)
@@ -195,5 +199,5 @@ ggplot(age_gap, aes(x =APOE, y=as.numeric(Gap) , fill = APOE )  ) +
   theme_bw()+
   labs(x = "Genoptype", y = paste0( "Age Gap") ) +
   theme_bw() 
-ggsave( paste0(" Age_gap.png" ), plot = last_plot(), dpi = 300)
+ggsave( paste0(length(mean_names),"_bundles_Age_gap.png" ), plot = last_plot(), dpi = 300)
 
