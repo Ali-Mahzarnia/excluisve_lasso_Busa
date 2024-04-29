@@ -1,9 +1,12 @@
 library(xlsx)
 library(ggplot2)
+library("readxl")
 library("emmeans")
+options(java.parameters = "-Xmx1000m")
 
-path = "master_df_all_combined.xlsx"
-df_original = read.xlsx2(path, sheetName = "Sheet1")
+
+path = "master_df_all_all_all_all_all_combined.xlsx"
+df_original = read_excel(path)
 
 
 df = df_original[as.numeric( df_original$risk_for_ad )<2 ,]
@@ -122,7 +125,7 @@ age_predicted_whole$age = c ( df$age , df_risk_y)
 age_predicted_whole[,1] = (as.numeric(age_predicted_whole[,1])-alpha)/beta
 
 age_predicted_whole$age_gap_corr= age_predicted_whole$age_pred - as.numeric(age_predicted_whole$age)
-age_predicted_whole$risk = c(df$risk, df_sick$risk)
+age_predicted_whole$risk = c(df$risk_for_ad, df_sick$risk_for_ad)
 
 age_predicted_whole_plot = age_predicted_whole[age_predicted_whole$risk<2,]
 age_gap_sick_df = age_predicted_whole[age_predicted_whole$risk>1, ]
