@@ -4,7 +4,7 @@ library("emmeans")
 
 path = "master_df_all_combined.xlsx"
 df_original = read.xlsx2(path, sheetName = "Sheet1")
- 
+
 
 df = df_original[as.numeric( df_original$risk_for_ad )<2 ,]
 
@@ -13,12 +13,15 @@ sd_names = colnames(df)[grepl("sdfa", colnames(df))]
 num_st_names = colnames(df)[  grepl("num_sl", colnames(df)) & ! grepl("num_sl_assym", colnames(df)) ]
 vol_st_names = colnames(df)[  grepl("vol_sl", colnames(df)) & ! grepl("vol_sl_assym", colnames(df)) ]
 len_st_names = colnames(df)[  grepl("len_sl", colnames(df)) & ! grepl("len_sl_assym", colnames(df)) ]
+BUAN_st_names = colnames(df)[  grepl("BUAN", colnames(df))  ]
+AI_st_names = colnames(df)[  grepl("assym", colnames(df)) & !grepl("sl", colnames(df))  ]
+
 
 age = df["age"]
 
 
-df_run_x = cbind( df[mean_names], df[sd_names], df[num_st_names], df[vol_st_names], df[len_st_names] )
-all_names = c(mean_names,sd_names, num_st_names, vol_st_names, len_st_names )
+df_run_x =df_run_x = cbind(  df[sd_names], df[num_st_names], df[vol_st_names], df[len_st_names], df[BUAN_st_names], df[AI_st_names] ) #cbind( df[mean_names], df[sd_names], df[num_st_names], df[vol_st_names], df[len_st_names] )
+all_names = c(sd_names, num_st_names, vol_st_names, len_st_names,BUAN_st_names , AI_st_names )
 df_run_x = t(apply(df_run_x, 1, unlist))
 df_run_x = t(apply(df_run_x, 1, as.numeric))
 df_run_x = scale(df_run_x)
@@ -30,7 +33,7 @@ df_run = cbind(df_run_y,df_run_x)
 
 library(ExclusiveLasso)
 set.seed(123)
-v.group = c( rep(1,length(mean_names)) , rep(2,length(sd_names)), rep(3,length(num_st_names)), rep(4,length(vol_st_names)), rep(5,length(len_st_names))  )
+v.group = c( rep(1,length(sd_names)), rep(2,length(num_st_names)), rep(3,length(vol_st_names)), rep(4,length(len_st_names)), rep(5,length(BUAN_st_names)), rep(6,length(AI_st_names))  )
 
 ex_cv <- cv.exclusive_lasso( df_run_x,df_run_y, groups = v.group,family="gaussian", 
                              intercept = T, nfolds=10)
@@ -55,14 +58,14 @@ index= which(coefs != 0)
 
 
 results =cbind(all_names[index], coefs[index] )
-write.xlsx2( results , paste0(length(mean_names),"_bundles_full_model.xlsx") )
+write.xlsx2( results , paste0(length(mean_names),"_bundles_full_model_buan_ai.xlsx") )
 
 
 # x=df_run_x[1,]
 # ex$intercept + t(coefs)%*%x 
 
 
-age_gap_whole = as.data.frame(df_run_y  - predict(ex))
+age_gap_whole = as.data.frame(predict(ex) - df_run_y   )
 colnames(age_gap_whole) = "age_gap"
 age_gap_whole$geno =  df$geno
 age_gap_whole$age = df$age  
@@ -74,7 +77,7 @@ age_gap_whole$age = df$age
 ggplot(age_gap_whole, aes( x=as.numeric(age), y= age_gap, fill = geno, color = geno  ) )+
   geom_smooth( method='lm')#+geom_text(x=40, y=15, label=paste0("Intercept P Values" , ) )
 
-ggsave(  paste0(length(mean_names),"_bundles_age_gap_vs_age.png"), plot= last_plot())
+ggsave(  paste0(length(mean_names),"_bundles_age_gap_vs_age_buan_ai.png"), plot= last_plot())
 
 
 ############## now bias correction
@@ -87,7 +90,7 @@ y_3_true = df_run_y[index3]
 
 df_sick = df_original[as.numeric( df_original$risk_for_ad )>1 ,]
 
-df_sick_x = cbind( df_sick[mean_names], df_sick[sd_names], df_sick[num_st_names], df_sick[vol_st_names], df_sick[len_st_names] )
+df_sick_x = cbind(  df_sick[sd_names], df_sick[num_st_names], df_sick[vol_st_names], df_sick[len_st_names], df_sick[BUAN_st_names],  df_sick[AI_st_names]  )
 df_sick_x = t(apply(df_sick_x, 1, unlist))
 df_sick_x = t(apply(df_sick_x, 1, as.numeric))
 df_sick_x = scale(df_sick_x)
@@ -131,14 +134,14 @@ ggplot(age_predicted_whole_plot, aes( x=as.numeric(age), y= age_gap_corr, fill =
 
 
 
-ggsave(  paste0(length(mean_names),"_bundles_age_gap_vs_age_after_correction.png"), plot= last_plot())
+ggsave(  paste0(length(mean_names),"_bundles_age_gap_vs_age_after_correction_buan_ai.png"), plot= last_plot())
 
 
 ggplot(age_predicted_whole_plot, aes( x=as.numeric(age), y= age_pred, fill = geno, color = geno  ) )+
   geom_point()+geom_smooth( method='lm') + #+geom_text(x=40, y=15, label=paste0("Intercept P Values" , ) )
   geom_point(data=age_gap_sick_df,  aes(x=as.numeric(age),y=age_pred ),colour="green") + theme_bw()
 
-ggsave(  paste0(length(mean_names),"_bundles_age_pred_vs_age_after_correction.png"), plot= last_plot())
+ggsave(  paste0(length(mean_names),"_bundles_age_pred_vs_age_after_correction_buan_ai.png"), plot= last_plot())
 
 
 
